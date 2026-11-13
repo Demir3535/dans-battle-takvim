@@ -328,6 +328,22 @@ form.addEventListener("submit",e=>{
 const pastBtn=document.getElementById("pastBtn"),pastEl=document.getElementById("past");
 pastBtn.addEventListener("click",()=>{pastEl.hidden=!pastEl.hidden;pastBtn.setAttribute("aria-expanded",String(!pastEl.hidden));pastBtn.textContent=pastEl.hidden?"Geçmiş etkinlikleri göster":"Geçmiş etkinlikleri gizle";});
 chips();cities();render();
+
+// Ziyaret sayacı (GoatCounter). Aynı tarayıcı aynı gün içinde yalnızca bir kez sayılır:
+// bugünün tarihi localStorage'a yazılır, o gün tekrar girişte sayaç betiği hiç yüklenmez.
+(function(){
+  const KEY="battleTakvimi.sayildi";
+  const d=new Date(),gun=d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
+  let depo=true;
+  try{if(localStorage.getItem(KEY)===gun)return;}catch(e){depo=false;}
+  if(location.protocol==="file:"||location.hostname==="localhost")return;
+  const s=document.createElement("script");
+  s.async=true;
+  s.src="https://gc.zgo.at/count.js";
+  s.setAttribute("data-goatcounter","https://demiravci.goatcounter.com/count");
+  s.onload=function(){if(depo){try{localStorage.setItem(KEY,gun);}catch(e){}}};
+  document.body.appendChild(s);
+})();
 </script>
 </body>
 </html>
