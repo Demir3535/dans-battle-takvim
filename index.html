@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Battle Takvimi Türkiye</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a flyer wall turned into a list. Big date block on the left of every row, like a gig poster strip. */
+:root{
+  --paper:#f1f0ec;
+  --card:#fbfaf7;
+  --ink:#16181d;
+  --muted:#5d6068;
+  --line:#d6d3cb;
+  --tape:#d8341c;      /* accent: gaffer-tape red */
+  --tape-ink:#ffffff;
+  --cobalt:#1f47c9;    /* links, secondary */
+  --ok:#17794a;
+  --warn:#a15c00;
+  --font-display:"Bricolage Grotesque","Arial Narrow",Arial,sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#131519; --card:#1b1e24; --ink:#eceae4; --muted:#a1a4ab; --line:#30343c;
+    --tape:#ff5a3c; --tape-ink:#16181d; --cobalt:#8fa9ff; --ok:#5fd39a; --warn:#f0b35a;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131519; --card:#1b1e24; --ink:#eceae4; --muted:#a1a4ab; --line:#30343c;
+  --tape:#ff5a3c; --tape-ink:#16181d; --cobalt:#8fa9ff; --ok:#5fd39a; --warn:#f0b35a;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.5}
+a{color:var(--cobalt)}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
+.wrap{max-width:980px;margin:0 auto;padding:28px 20px 64px}
+
+header.top{display:flex;flex-wrap:wrap;gap:16px 32px;align-items:flex-end;justify-content:space-between;border-bottom:3px solid var(--ink);padding-bottom:18px}
+h1{font-family:var(--font-display);font-weight:800;font-size:clamp(2rem,6vw,3.4rem);line-height:.95;margin:0;letter-spacing:-.02em;text-wrap:balance}
+h1 span{background:var(--tape);color:var(--tape-ink);padding:0 .18em;display:inline-block;transform:rotate(-1.2deg)}
+.sub{color:var(--muted);margin:10px 0 0;max-width:52ch}
+.stamp{font-family:var(--font-mono);font-size:.8rem;color:var(--muted);text-align:right}
+.stamp b{color:var(--ink);font-weight:600}
+
+.next{margin:22px 0 8px;background:var(--ink);color:var(--paper);padding:18px 20px;display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;justify-content:space-between}
+.next .lbl{font-family:var(--font-mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;opacity:.75}
+.next .nm{font-family:var(--font-display);font-weight:800;font-size:1.5rem;line-height:1.1}
+.next .cd{font-family:var(--font-mono);font-weight:600;font-size:1.1rem;color:var(--tape)}
+:root[data-theme="dark"] .next .cd{color:#c22a14}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .next .cd{color:#c22a14}}
+
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:22px 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1.5px solid var(--ink);background:transparent;padding:5px 12px;border-radius:999px;cursor:pointer;font-size:.9rem;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+select{border:1.5px solid var(--ink);background:var(--card);padding:6px 10px;border-radius:6px}
+.bar .sp{flex:1}
+.btn{border:1.5px solid var(--ink);background:var(--tape);color:var(--tape-ink);font-weight:600;padding:7px 14px;border-radius:6px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink)}
+
+h2{font-family:var(--font-display);font-weight:800;font-size:1.5rem;margin:36px 0 4px;letter-spacing:-.01em}
+.note{color:var(--muted);font-size:.92rem;margin:0 0 14px;max-width:65ch}
+.month{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:22px 0 8px;display:flex;gap:10px;align-items:center}
+.month::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.ev{display:grid;grid-template-columns:92px 1fr;gap:0;background:var(--card);border:1.5px solid var(--ink);margin-bottom:10px}
+.date{background:var(--ink);color:var(--paper);padding:12px 8px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.date .d{font-family:var(--font-display);font-weight:800;font-size:1.9rem;line-height:1;font-variant-numeric:tabular-nums}
+.date .m{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase}
+.date .y{font-family:var(--font-mono);font-size:.7rem;opacity:.7}
+.ev.past .date{background:var(--line);color:var(--ink)}
+.ev.mine{border-style:dashed}
+.body{padding:12px 14px;min-width:0}
+.row1{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.ev h3{font-family:var(--font-display);font-weight:800;font-size:1.2rem;line-height:1.15;margin:0;overflow-wrap:anywhere}
+.star{border:0;background:transparent;cursor:pointer;font-size:1.25rem;line-height:1;padding:2px 4px;color:var(--muted)}
+.star[aria-pressed="true"]{color:var(--tape)}
+.where{margin:3px 0 6px;color:var(--muted);font-size:.93rem}
+.cats{margin:0 0 8px;font-size:.93rem}
+.meta{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;font-size:.82rem}
+.tag{font-family:var(--font-mono);font-size:.72rem;border:1px solid var(--line);padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em}
+.tag.left{border-color:var(--tape);color:var(--tape);font-weight:600}
+.tag.ok{border-color:var(--ok);color:var(--ok)}
+.tag.warn{border-color:var(--warn);color:var(--warn)}
+.meta a{font-weight:500}
+.x{border:0;background:transparent;color:var(--muted);cursor:pointer;text-decoration:underline;padding:0;font-size:.82rem}
+.empty{border:1.5px dashed var(--line);padding:18px;color:var(--muted)}
+
+.watch{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.w{background:var(--card);border:1.5px solid var(--line);padding:12px 14px}
+.w h3{font-family:var(--font-display);font-weight:800;font-size:1.05rem;margin:0 0 2px}
+.w p{margin:0;font-size:.9rem;color:var(--muted)}
+.w .when{font-family:var(--font-mono);font-size:.74rem;color:var(--ink);text-transform:uppercase;letter-spacing:.05em;margin-top:6px;display:block}
+
+form{background:var(--card);border:1.5px solid var(--ink);padding:16px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+form[hidden]{display:none}
+label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;font-weight:500}
+label.wide{grid-column:1/-1}
+input{border:1.5px solid var(--line);background:var(--paper);padding:8px 10px;border-radius:6px;min-width:0}
+.acts{grid-column:1/-1;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.msg{color:var(--warn);font-size:.88rem}
+footer{margin-top:44px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:.86rem}
+footer p{margin:0 0 8px;max-width:70ch}
+@media (max-width:520px){
+  .ev{grid-template-columns:70px 1fr}
+  .date .d{font-size:1.5rem}
+  form{grid-template-columns:1fr}
+  .stamp{text-align:left}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Battle <span>Takvimi</span><br>Türkiye</h1>
+      <p class="sub">Hip-hop ve street dance yarışmaları, battle'lar ve koreografi şampiyonaları. Tek liste, tarih sırasıyla.</p>
+    </div>
+    <div class="stamp">Son tarama: <b>13 Kasım 2026</b><br><span id="count"></span></div>
+  </header>
+
+  <div class="next" id="next"></div>
+
+  <div class="bar">
+    <div class="chips" id="chips" role="group" aria-label="Tür filtresi"></div>
+    <select id="city" aria-label="Şehir filtresi"></select>
+    <span class="sp"></span>
+    <button class="btn" id="addBtn" type="button">+ Yarışma ekle</button>
+  </div>
+
+  <form id="form" hidden>
+    <label class="wide">Yarışma adı<input id="f-name" required maxlength="80" placeholder="örn. Peekaboo Battle Vol.3"></label>
+    <label>Başlangıç tarihi<input id="f-start" type="date" required></label>
+    <label>Bitiş tarihi (tek günse boş)<input id="f-end" type="date"></label>
+    <label>Şehir<input id="f-city" maxlength="40" placeholder="İzmir"></label>
+    <label>Mekan<input id="f-venue" maxlength="80"></label>
+    <label class="wide">Kategoriler<input id="f-cats" maxlength="120" placeholder="1vs1 Hiphop, 2vs2 All Style"></label>
+    <label class="wide">Link (Instagram postu, kayıt formu)<input id="f-link" type="url" maxlength="300" placeholder="https://"></label>
+    <div class="acts">
+      <button class="btn" type="submit">Kaydet</button>
+      <button class="btn ghost" type="button" id="cancel">Vazgeç</button>
+      <span class="msg" id="msg"></span>
+    </div>
+  </form>
+
+  <h2>Yaklaşanlar</h2>
+  <p class="note">Tarihi resmi bir kaynakta yazan etkinlikler. Kayıt açılış ve son başvuru tarihleri çoğunlukla Instagram'dan duyuruluyor; gitmeden önce kaynağa bak.</p>
+  <div id="upcoming"></div>
+
+  <h2>Tarihi beklenenler</h2>
+  <p class="note">Bu organizasyonların yeni tarihi henüz açıklanmamış ya da yalnızca Instagram'da duruyor. Varsa geçen sezonki tarihi yazdım; çoğu her yıl aynı döneme geliyor. Tarihi öğrenince "Yarışma ekle" ile listeye al.</p>
+  <div class="watch" id="watch"></div>
+
+  <h2>2026'da geçenler</h2>
+  <p class="note">Sezonun ritmini görmek için. Aynı etkinlikler 2027'de büyük ihtimalle benzer haftalarda olacak.</p>
+  <button class="btn ghost" id="pastBtn" type="button" aria-expanded="false">Geçmiş etkinlikleri göster</button>
+  <div id="past" hidden style="margin-top:12px"></div>
+
+  <footer>
+    <p>Kaynaklar: Dancer Board / Dans Dünyam, TDSF, Red Bull, Hip Hop International, World of Dance Türkiye, go&amp;dance, flowdat, organizatör sayfaları. Her kartta kaynağın linki var.</p>
+    <p>"Yarışma ekle" ile girdiklerin ve yıldızladıkların yalnızca bu tarayıcıda saklanır; başka cihazda ya da arkadaşında görünmez.</p>
+  </footer>
+</div>
+
+<script>
+const MONTHS=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+const MSHORT=["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+const TYPES={battle:"Battle",crew:"Koreografi / Crew",fed:"Federasyon",intl:"Yurt dışı"};
+
+// t: battle | crew | fed | intl ; sure:false = tarih kaynakta kesin değil
+const EVENTS=[
+ {id:"wdsf-bhb-26",n:"WDSF Breaking Hiphop Battle 2026",s:"2026-12-04",e:"2026-12-06",c:"",v:"Adidas Arena (şehir kaynakta yazmıyor)",k:"1vs1 Breaking, 2vs2 Breaking",t:["battle","intl","fed"],u:"https://dancerboard.com/dans-yarismalari/2026-wdsf-breaking-hiphop-battle",src:"Dancer Board"},
+ {id:"hype-vibe-4",n:"Hype & Vibe Vol.4",s:"2026-12-05",e:"2026-12-06",c:"Bursa",v:"Podyumpark Sanat Mahal, Nilüfer",k:"1vs1 Hiphop Pro, 2vs2 All Styles, 1vs1 Hiphop Kids/Junior, 3vs3 Hiphop Crew. Ödül 1.500 EUR.",t:["battle"],u:"https://dancerboard.com/dans-yarismalari/hype-vibe-5-6-aralik-2026",src:"Dancer Board",ig:"hypeandvibe_event"},
+ {id:"0hertz-26",n:"0Hertz Battle 2026",s:"2026-12-19",c:"İstanbul",v:"Mekan henüz açıklanmadı",k:"1vs1 Hiphop Kids/Junior, 1vs1 Hiphop Pro, 2vs2 All Styles",t:["battle"],u:"https://dancerboard.com/dans-yarismalari/0hertz-battle-2026",src:"Dancer Board"},
+ {id:"edf-27",n:"EDF Eskişehir Dans Festivali (14.)",s:"2027-02-03",e:"2027-02-07",c:"Eskişehir",v:"Tasigo Hotel",k:"1vs1 All Style Battle. Sadece battle için ayrı Battle Pass var.",t:["battle"],u:"https://www.goandance.com/en/event/9985/edf-turkey",src:"go&dance"},
+ {id:"wod-tr-27",n:"World of Dance Türkiye",s:"2027-04-03",e:"2027-04-04",c:"İstanbul",v:"ORA Arena, Bayrampaşa",k:"Takım (12 yaş altı, 17 yaş altı, genel) ve All Styles Battle 1v1, 2v2, crew. Seçme formu 15 Aralık 2026 – 25 Ocak 2027.",t:["crew","battle"],u:"https://www.worldofdanceturkiye.com/",src:"worldofdanceturkiye.com",ig:"worldofdance_turkiye",sure:false},
+ {id:"wdsf-em-27",n:"WDSF Avrupa Şampiyonası Hip-Hop",s:"2027-04-03",e:"2027-04-04",c:"Lund, İsveç",v:"",k:"Koreografi (küçük ve büyük takım), Freestyle 1v1 ve 2v2. Katılım TDSF milli takım yoluyla.",t:["fed","intl","crew","battle"],u:"https://www.danssport.se/foer-dansare/taevling/wdsf-em-hip-hop-2027/",src:"İsveç Dans Sporları Federasyonu"},
+ {id:"hhi-tr-27",n:"Hip Hop International Türkiye",s:"2027-05-09",c:"İstanbul",v:"Mekan henüz açıklanmadı",k:"Crew koreografi elemesi. Kazananlar Phoenix'teki dünya şampiyonasına gider.",t:["crew"],u:"https://hiphopinternational.com/schedule-of-events-worldwide/",src:"hiphopinternational.com"},
+ {id:"ido-eu-27",n:"IDO Avrupa Street Dance Show Şampiyonası",s:"2027-06-26",e:"2027-06-27",c:"Saraybosna",v:"",k:"Street dance show. Son kayıt 15 Mayıs 2027.",t:["intl","crew"],u:"https://www.ido-dance.com/calendar/competitions/competition-details/?cid=2573",src:"IDO"},
+ {id:"hhi-world-27",n:"World Hip Hop Dance Championship",s:"2027-07-24",e:"2027-07-31",c:"Phoenix, ABD",v:"",k:"HHI dünya finali",t:["intl","crew"],u:"https://hiphopinternational.com/schedule-of-events-worldwide/",src:"hiphopinternational.com"},
+ {id:"rb-world-27",n:"Red Bull Dance Your Style Dünya Finali",s:"2027-11-06",c:"Londra",v:"",k:"Türkiye şampiyonu burada yarışır. Türkiye elemelerinin 2027 tarihleri henüz yok.",t:["intl","battle"],u:"https://www.redbull.com/int-en/events/red-bull-dance-your-style-world-final-london-2027/event-guide",src:"Red Bull"},
+
+ // 2026 geçmiş
+ {id:"stg-26",n:"Smash the Ground 2026",s:"2026-01-24",e:"2026-01-25",c:"İzmir",v:"HipHome (Alsancak workshop, Bornova battle)",k:"2vs2 Hiphop Battle, 16 yaş altı ve üstü",t:["battle"],u:"https://flowdat.co/events/smash-the-ground-2026-6fd38e2c053a",src:"flowdat",ig:"hiphomeevents"},
+ {id:"bhj-26",n:"Bakırköy Hip Hop Jam",s:"2026-03-29",c:"İstanbul",v:"Bakırköy",k:"2vs2 Breaking, All Style Battle",t:["battle"],u:"https://dancerboard.com/",src:"Dans Dünyam"},
+ {id:"isd-26",n:"Kids Dance Battle (Istanbul Street Dance)",s:"2026-04-23",c:"İstanbul",v:"Galataport, Doğuş Meydanı",k:"8-13 yaş, videolu ön eleme",t:["battle"],u:"https://www.istanbulstreetdance.com/",src:"istanbulstreetdance.com"},
+ {id:"idf-26",n:"Istanbul Dance Festival: Back on Track All Style Battle",s:"2026-05-14",e:"2026-05-20",c:"İstanbul",v:"The Green Park Hotel Bostancı",k:"All style battle (hip hop ve latin)",t:["battle"],u:"https://www.istanbuldancefestivals.com/about-us-3-2/",src:"istanbuldancefestivals.com"},
+ {id:"thdc-26",n:"Turkey Hip-Hop Dance Championship",s:"2026-05-19",c:"İstanbul",v:"Maltepe Üniversitesi",k:"Crew koreografi",t:["crew"],u:"https://dancerboard.com/",src:"Dans Dünyam"},
+ {id:"tdsf-hh-26",n:"TDSF Serbest Stil (Hip Hop) Türkiye Şampiyonası",s:"2026-07-01",e:"2026-07-03",c:"İstanbul",v:"Başakşehir Spor Salonu",k:"Grup, solo, duo",t:["fed","crew"],u:"https://www.tdsf.org.tr/haberler",src:"TDSF"},
+ {id:"tdsf-bt-26",n:"TDSF Hip Hop Battle Türkiye Şampiyonası",s:"2026-07-04",c:"İstanbul",v:"Başakşehir Spor Salonu",k:"1vs1 battle. Kayıt ücretsiz, kulüp lisansı gerekli.",t:["fed","battle"],u:"https://www.tdsf.org.tr/haberler/hip-hop-battle-turkiye-sampiyonasi-sporcu-listeleri-ve-programi-hakkinda",src:"TDSF"},
+ {id:"rb-tr-26",n:"Red Bull Dance Your Style Türkiye Finali",s:"2026-08-01",c:"İstanbul",v:"QNB Terminal Kadıköy",k:"Elemeler Haziran'da Antalya, Ankara, İzmir ve İstanbul'da yapıldı. Kazanan: Kerem Çolak.",t:["battle"],u:"https://www.redbull.com/tr-tr/events/dance-your-style-turkiye",src:"Red Bull"},
+ {id:"sc-26",n:"Studio Cypher İstanbul",s:"2026-08-02",c:"İstanbul",v:"Fikirtepe",k:"1vs1 Allstyle Concept Battle, 1vs1 Breaking",t:["battle"],u:"https://dancerboard.com/",src:"Dans Dünyam"},
+ {id:"oc-26",n:"Ocean Cypher: Play Ground",s:"2026-08-30",c:"",v:"Şehir kaynakta yazmıyor",k:"1vs1 battle",t:["battle"],u:"https://dancerboard.com/",src:"Dans Dünyam"},
+ {id:"rtr-26",n:"Raise The Roof Hip Hop Festivali",s:"2026-09-17",e:"2026-09-20",c:"İzmir",v:"Expo Sport İzmir",k:"Battle'lar ve gösteriler. Son gün FlowState Battle: 1vs1 ve 4vs4.",t:["battle"],u:"https://www.dansdunyam.com/haber/flowstate-battle-2026-kadinlarin-ritmiyle-yukselen-hip-hop-mucadelesi-izmire-geliyor",src:"Dans Dünyam"},
+ {id:"adc-26",n:"Antalya Dance Clash",s:"2026-09-26",c:"Antalya",v:"Agora AVM",k:"Hip Hop, K-Pop, TR Pop, Jazz Funk, Show Dance, Breaking Battle. TDSF onaylı.",t:["crew","battle","fed"],u:"http://www.antalyadance.company/",src:"antalyadance.company"},
+ {id:"bhjc-26",n:"Bakırköy Hip Hop Jam Cypher",s:"2026-10-17",e:"2026-10-18",c:"İstanbul",v:"Bakırköy",k:"International Dance Battle. Düzenleyen: Bakırköy Dans Sporları Kulübü.",t:["battle"],u:"https://dancerboard.com/",src:"Dans Dünyam"}
+];
+
+const WATCH=[
+ {n:"Peekaboo",p:"Web'de tarih bulunamadı. Duyurular Instagram'da.",w:"Tarih yok"},
+ {n:"Herbs Dance",p:"Web'de tarih bulunamadı. Duyurular Instagram'da.",w:"Tarih yok"},
+ {n:"Special Playground",p:"Web'de tarih bulunamadı. Ağustos 2026'daki \"Ocean Cypher: Play Ground\" ile ilgisi doğrulanamadı.",w:"Tarih yok"},
+ {n:"BOSS",p:"Web'de tarih bulunamadı. Duyurular Instagram'da.",w:"Tarih yok"},
+ {n:"Rhythm Rumble",p:"Web'de tarih bulunamadı. Duyurular Instagram'da.",w:"Tarih yok"},
+ {n:"Cast & Vibe",p:"Web'de tarih bulunamadı. Duyurular Instagram'da.",w:"Tarih yok"},
+ {n:"Smash the Ground (HipHome, İzmir)",p:"Her yıl kış başı. 2026'da 24-25 Ocak'taydı. Instagram: @hiphomeevents",w:"Beklenen: Ocak 2027"},
+ {n:"Bakırköy Hip Hop Jam",p:"2026'da 29 Mart (Jam) ve 17-18 Ekim (Cypher). Bakırköy Dans Sporları Kulübü.",w:"Beklenen: Mart 2027"},
+ {n:"Kids on the Move (Antalya)",p:"IDO lisanslı, GC Dance Academy. 2024'te 9-13 Mayıs'taydı.",w:"Beklenen: Mayıs 2027"},
+ {n:"Kids Dance Battle, Galataport",p:"Istanbul Street Dance, her 23 Nisan. Başvuru Nisan başında kapanıyor.",w:"Beklenen: 23 Nisan 2027"},
+ {n:"TDSF Hip Hop Türkiye Şampiyonası",p:"2025'te 26-28 Haziran, 2026'da 1-4 Temmuz. 2027 faaliyet takvimi yayınlanınca belli olur.",w:"Beklenen: Haz-Tem 2027"},
+ {n:"Red Bull Dance Your Style Türkiye",p:"2026'da elemeler Haziran, final 1 Ağustos. 2027 başvuruları genelde ilkbaharda açılıyor.",w:"Beklenen: Haz-Ağu 2027"},
+ {n:"Studio Cypher (İstanbul)",p:"Seri etkinlik, yıl içinde birkaç kez. Son bilinen: Ağustos ve Eylül 2026.",w:"Düzensiz"},
+ {n:"Raise The Roof / FlowState / NOE-GAMES (İzmir)",p:"2026'da Eylül ortasında art arda yapıldı.",w:"Beklenen: Eylül 2027"},
+ {n:"Antalya Dance Clash",p:"İlk kez 26 Eylül 2026'da yapıldı.",w:"Beklenen: Eylül 2027"}
+];
+
+const LS="battleTakvimi.v1";
+let store={mine:[],fav:[]};
+try{const r=JSON.parse(localStorage.getItem(LS)||"null");if(r&&Array.isArray(r.mine)&&Array.isArray(r.fav))store=r;}catch(e){}
+function save(){try{localStorage.setItem(LS,JSON.stringify(store));}catch(e){}}
+
+const pd=s=>{const[a,b,c]=s.split("-").map(Number);return new Date(a,b-1,c);};
+const today=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate());})();
+const dayDiff=(a,b)=>Math.round((a-b)/864e5);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const safeUrl=u=>/^https?:\/\//i.test(u||"")?u:"";
+
+let fType="all",fCity="all";
+function all(){return EVENTS.concat(store.mine.map(m=>Object.assign({mine:true,t:["battle"],src:"Senin eklediğin"},m)));}
+function endOf(e){return pd(e.e||e.s);}
+function isPast(e){return endOf(e)<today;}
+function match(e){
+  if(fType==="fav"){if(!store.fav.includes(e.id))return false;}
+  else if(fType!=="all"&&!(e.t||[]).includes(fType))return false;
+  if(fCity!=="all"&&e.c!==fCity)return false;
+  return true;
+}
+function left(e){
+  const s=pd(e.s),en=endOf(e);
+  if(en<today)return "";
+  if(s<=today)return "Şu an sürüyor";
+  const n=dayDiff(s,today);
+  return n===1?"Yarın":n+" gün kaldı";
+}
+function dateBlock(e){
+  const s=pd(e.s),en=e.e?pd(e.e):null;
+  const d=en&&en.getTime()!==s.getTime()?(s.getMonth()===en.getMonth()?s.getDate()+"–"+en.getDate():s.getDate()+"–"+en.getDate()):String(s.getDate());
+  const m=en&&en.getMonth()!==s.getMonth()?MSHORT[s.getMonth()]+"–"+MSHORT[en.getMonth()]:MSHORT[s.getMonth()];
+  return '<div class="date"><span class="d">'+d+'</span><span class="m">'+m+'</span><span class="y">'+s.getFullYear()+'</span></div>';
+}
+function card(e){
+  const past=isPast(e),fav=store.fav.includes(e.id),l=left(e),u=safeUrl(e.u);
+  const where=[e.c,e.v].filter(Boolean).map(esc).join(" · ");
+  let meta="";
+  if(l)meta+='<span class="tag left">'+l+'</span>';
+  if(e.sure===false)meta+='<span class="tag warn">Tarih kesinleşmedi</span>';
+  (e.t||[]).forEach(t=>{if(TYPES[t])meta+='<span class="tag">'+TYPES[t]+'</span>';});
+  if(u)meta+='<a href="'+esc(u)+'" target="_blank" rel="noopener">Kaynak: '+esc(e.src||"link")+'</a>';
+  if(e.ig)meta+='<a href="https://www.instagram.com/'+esc(e.ig)+'/" target="_blank" rel="noopener">@'+esc(e.ig)+'</a>';
+  if(e.mine)meta+='<button class="x" data-del="'+esc(e.id)+'" type="button">Sil</button>';
+  return '<article class="ev'+(past?" past":"")+(e.mine?" mine":"")+'">'+dateBlock(e)+
+    '<div class="body"><div class="row1"><h3>'+esc(e.n)+'</h3>'+
+    '<button class="star" type="button" data-fav="'+esc(e.id)+'" aria-pressed="'+fav+'" aria-label="Takip et" title="Takip et">'+(fav?"★":"☆")+'</button></div>'+
+    (where?'<p class="where">'+where+'</p>':'')+
+    (e.k?'<p class="cats">'+esc(e.k)+'</p>':'')+
+    '<div class="meta">'+meta+'</div></div></article>';
+}
+function grouped(list){
+  let html="",cur="";
+  list.forEach(e=>{const s=pd(e.s),key=MONTHS[s.getMonth()]+" "+s.getFullYear();
+    if(key!==cur){cur=key;html+='<div class="month">'+key+'</div>';}
+    html+=card(e);});
+  return html;
+}
+function render(){
+  const evs=all().filter(match);
+  const up=evs.filter(e=>!isPast(e)).sort((a,b)=>pd(a.s)-pd(b.s));
+  const past=evs.filter(isPast).sort((a,b)=>pd(b.s)-pd(a.s));
+  document.getElementById("upcoming").innerHTML=up.length?grouped(up):'<div class="empty">Bu filtrede yaklaşan etkinlik yok.</div>';
+  document.getElementById("past").innerHTML=past.length?grouped(past):'<div class="empty">Bu filtrede geçmiş etkinlik yok.</div>';
+  const allUp=all().filter(e=>!isPast(e)).sort((a,b)=>pd(a.s)-pd(b.s));
+  const tr=allUp.filter(e=>!(e.t||[]).includes("intl"));
+  const nx=tr[0]||allUp[0];
+  document.getElementById("next").innerHTML=nx?
+    '<div><div class="lbl">Sıradaki</div><div class="nm">'+esc(nx.n)+'</div><div>'+esc([nx.c,nx.v].filter(Boolean).join(" · "))+'</div></div><div class="cd">'+left(nx)+'</div>':
+    '<div class="nm">Listede yaklaşan etkinlik yok</div>';
+  document.getElementById("count").textContent=allUp.length+" yaklaşan · "+WATCH.length+" tarihi beklenen";
+}
+function chips(){
+  const defs=[["all","Hepsi"],["battle","Battle"],["crew","Koreografi / Crew"],["fed","Federasyon"],["intl","Yurt dışı"],["fav","★ Takip ettiklerim"]];
+  document.getElementById("chips").innerHTML=defs.map(d=>'<button class="chip" type="button" data-t="'+d[0]+'" aria-pressed="'+(fType===d[0])+'">'+d[1]+'</button>').join("");
+}
+function cities(){
+  const cs=[...new Set(all().map(e=>e.c).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"tr"));
+  document.getElementById("city").innerHTML='<option value="all">Tüm şehirler</option>'+cs.map(c=>'<option'+(c===fCity?" selected":"")+'>'+esc(c)+'</option>').join("");
+}
+document.getElementById("watch").innerHTML=WATCH.map(w=>'<div class="w"><h3>'+esc(w.n)+'</h3><p>'+esc(w.p)+'</p><span class="when">'+esc(w.w)+'</span></div>').join("");
+
+document.addEventListener("click",ev=>{
+  const t=ev.target.closest("[data-t],[data-fav],[data-del]");if(!t)return;
+  if(t.dataset.t){fType=t.dataset.t;chips();render();}
+  else if(t.dataset.fav){const id=t.dataset.fav,i=store.fav.indexOf(id);i<0?store.fav.push(id):store.fav.splice(i,1);save();render();}
+  else if(t.dataset.del){store.mine=store.mine.filter(m=>m.id!==t.dataset.del);save();cities();render();}
+});
+document.getElementById("city").addEventListener("change",e=>{fCity=e.target.value;render();});
+const form=document.getElementById("form"),msg=document.getElementById("msg");
+document.getElementById("addBtn").addEventListener("click",()=>{form.hidden=!form.hidden;if(!form.hidden)document.getElementById("f-name").focus();});
+document.getElementById("cancel").addEventListener("click",()=>{form.hidden=true;msg.textContent="";});
+form.addEventListener("submit",e=>{
+  e.preventDefault();
+  const g=id=>document.getElementById(id).value.trim();
+  const n=g("f-name"),s=g("f-start"),en=g("f-end"),link=g("f-link");
+  if(!n||!s){msg.textContent="Ad ve başlangıç tarihi gerekli.";return;}
+  if(en&&en<s){msg.textContent="Bitiş tarihi başlangıçtan önce olamaz.";return;}
+  if(link&&!safeUrl(link)){msg.textContent="Link https:// ile başlamalı.";return;}
+  store.mine.push({id:"m"+Date.now(),n:n,s:s,e:en||undefined,c:g("f-city"),v:g("f-venue"),k:g("f-cats"),u:link});
+  save();form.reset();form.hidden=true;msg.textContent="";cities();render();
+});
+const pastBtn=document.getElementById("pastBtn"),pastEl=document.getElementById("past");
+pastBtn.addEventListener("click",()=>{pastEl.hidden=!pastEl.hidden;pastBtn.setAttribute("aria-expanded",String(!pastEl.hidden));pastBtn.textContent=pastEl.hidden?"Geçmiş etkinlikleri göster":"Geçmiş etkinlikleri gizle";});
+chips();cities();render();
+</script>
+</body>
+</html>
